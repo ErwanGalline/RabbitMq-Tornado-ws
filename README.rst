@@ -1,3 +1,13 @@
+THIS PROJECT IS A FORK FROM https://github.com/Kocal/django-tornado-websockets  !!!
+===================================================================================
+Add RabbitMq connector to django-tornado-ws stack
+
+References :
+- http://django-tornado-websockets.readthedocs.io/en/latest/index.html
+- https://www.rabbitmq.com/
+
+
+
 
 DEPRECATED SINCE DJANGO-CHANNELS, SEE https://github.com/django/channels
 ========================================================================
