@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .hide {
+            display: none
+        }
+    </style>
+</head>
+<body>
+<h1>WebSocket chat</h1>
+
+<!-- "Authentification" -->
+
+<form name="choose-username">
+    <label>Please choose an username:
+        <input type="text" name="username" autocomplete="off">
+    </label>
+    <input type="submit" value="Chat!">
+</form>
+
+<!-- Web chat -->
+
+<div id="chat" class="hide">
+    <form name="message">
+        <label>Message:
+            <input type="text" name="message" autocomplete="off">
+            <input type="submit" value="Send">
+        </label>
+    </form>
+
+    <h2>Messages:</h2>
+    <ul id="messages"></ul>
+</div>
+
+<script src="tws/tornadowebsocket-es6.js"></script>
+
+<script>
+    /* --- Authentification --- */
+
+    var $formChooseUsername = document.querySelector('form[name="choose-username"]');
+    var $username = $formChooseUsername.querySelector('input[name="username"]');
+    var username;
+
+    $formChooseUsername.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        username = $username.value.trim();
+
+        if (username == '') {
+            return alert('Provide an username')
+        }
+
+        return show_chat();
+    }, false);
+</script>
+<script>
+    /* --- Web Chat --- */
+
+    var $chat = document.querySelector('#chat');
+    var $formMessage = document.querySelector('form[name="message"]');
+    var $messages = document.querySelector('#messages');
+    var $fieldMessage = $formMessage.querySelector('input[type="text"]');
+
+    function show_chat() {
+        $formChooseUsername.classList.add('hide');
+        $chat.classList.remove('hide');
+
+        var ws = new TornadoWebSocket('/my_chat');
+
+        ws.on('open', function (event) {
+            ws.emit('connection', {
+                username: username
+            });
+
+            ws.on('new_connection', function (data) {
+                write_message(data.message);
+            });
+
+            ws.on('new_message', function(data) {
+                write_message(data.username + ' writes: "' + data.message + '"');
+            });
+
+            $formMessage.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                ws.emit('message', {
+                    username: username,
+                    message: $fieldMessage.value.trim()
+                });
+
+            }, false);
+        });
+
+        ws.on('error', function(event) { console.log(event); });
+        ws.on('close', function(event) { console.log(event); });
+    }
+
+    function write_message(message) {
+        var $message = document.createElement('li');
+        $message.textContent = message;
+        $messages.appendChild($message)
+    }
+</script>
+
+</body>
+</html>
